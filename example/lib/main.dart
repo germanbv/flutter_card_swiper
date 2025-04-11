@@ -23,13 +23,34 @@ class Example extends StatefulWidget {
 
 class _ExamplePageState extends State<Example> {
   final CardSwiperController controller = CardSwiperController();
-
-  final cards = candidates.map(ExampleCard.new).toList();
+  final List<Widget> cards = candidates.map(ExampleCard.new).toList();
+  CardSwiperDirection? _previousSwipeDirection;
+  int _currentTopCardIndex = 0; // To track the current top card index
+  int? _specialCardIndex;
+  bool _hasSwipedRightStarted = false; // To prevent multiple insertions
 
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  void _handleRightSwipeStart(int index) {
+    print("Right swipe started at index: $index");
+    if (!_hasSwipedRightStarted) {
+      setState(() {
+        _hasSwipedRightStarted = true;
+        _specialCardIndex = index + 1;
+        cards.insert(
+          _specialCardIndex!,
+          ExampleCard(ExampleCandidateModel(
+              name: 'Special',
+              job: 'Test',
+              city: 'Valencia',
+              color: Colors.accents)),
+        );
+      });
+    }
   }
 
   @override
@@ -43,6 +64,8 @@ class _ExamplePageState extends State<Example> {
                 controller: controller,
                 cardsCount: cards.length,
                 onSwipe: _onSwipe,
+                onSwipeDirectionChange: _onSwipeDirectionChange,
+                onRightSwipeStart: _handleRightSwipeStart,
                 onUndo: _onUndo,
                 numberOfCardsDisplayed: 3,
                 backCardOffset: const Offset(40, 40),
@@ -53,7 +76,7 @@ class _ExamplePageState extends State<Example> {
                   horizontalThresholdPercentage,
                   verticalThresholdPercentage,
                 ) =>
-                    cards[index],
+                    cards[index % cards.length],
               ),
             ),
             Padding(
@@ -97,11 +120,23 @@ class _ExamplePageState extends State<Example> {
     int? currentIndex,
     CardSwiperDirection direction,
   ) {
-    debugPrint(
-      'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
-    );
+    if (currentIndex != null) {
+      setState(() {
+        _currentTopCardIndex = currentIndex % cards.length;
+        _hasSwipedRightStarted = false;
+      });
+    }
     return true;
   }
+
+  void _onSwipeDirectionChange(CardSwiperDirection newDirection, CardSwiperDirection? previousDirection) {
+    debugPrint('Swipe Direction Changed - Previous: $previousDirection, New: $newDirection');
+    setState(() {
+      _previousSwipeDirection = newDirection;
+    });
+  }
+
+  
 
   bool _onUndo(
     int? previousIndex,

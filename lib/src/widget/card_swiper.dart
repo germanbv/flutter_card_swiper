@@ -11,6 +11,8 @@ import 'package:flutter_card_swiper/src/utils/undoable.dart';
 
 part 'card_swiper_state.dart';
 
+typedef OnRightSwipeStart = void Function(int currentCardIndex);
+
 class CardSwiper extends StatefulWidget {
   /// Function that builds each card in the stack.
   ///
@@ -124,6 +126,7 @@ class CardSwiper extends StatefulWidget {
   ///
   /// Must be a positive value. Defaults to Offset(0, 40).
   final Offset backCardOffset;
+  final OnRightSwipeStart? onRightSwipeStart;
 
   const CardSwiper({
     required this.cardBuilder,
@@ -146,6 +149,7 @@ class CardSwiper extends StatefulWidget {
     this.numberOfCardsDisplayed = 2,
     this.onUndo,
     this.backCardOffset = const Offset(0, 40),
+    this.onRightSwipeStart,
     super.key,
   })  : assert(
           maxAngle >= 0 && maxAngle <= 360,

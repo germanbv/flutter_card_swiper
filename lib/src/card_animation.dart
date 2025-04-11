@@ -14,6 +14,7 @@ class CardAnimation {
     this.isVerticalSwipingEnabled = true,
     this.allowedSwipeDirection = const AllowedSwipeDirection.all(),
     this.onSwipeDirectionChanged,
+    this.onRightSwipeStart, // Add the new callback here
   }) : scale = initialScale;
 
   final double maxAngle;
@@ -24,6 +25,7 @@ class CardAnimation {
   final bool isVerticalSwipingEnabled;
   final AllowedSwipeDirection allowedSwipeDirection;
   final ValueChanged<CardSwiperDirection>? onSwipeDirectionChanged;
+  final VoidCallback? onRightSwipeStart; // Callback for right swipe start
 
   double left = 0;
   double top = 0;
@@ -31,6 +33,9 @@ class CardAnimation {
   double angle = 0;
   double scale;
   Offset difference = Offset.zero;
+
+  bool _isRightSwipeStarting = false; // Track if a right swipe is starting
+  static const double _kSwipeThreshold = 50.0; // Adjust this value as needed
 
   late Animation<double> _leftAnimation;
   late Animation<double> _topAnimation;
@@ -54,26 +59,45 @@ class CardAnimation {
     angle = 0;
     scale = initialScale;
     difference = Offset.zero;
+    _isRightSwipeStarting = false; // Reset the flag
   }
 
   void update(double dx, double dy, bool inverseAngle) {
     if (allowedSwipeDirection.right && allowedSwipeDirection.left) {
       if (left > 0) {
+        if (!_isRightSwipeStarting) {
+          _isRightSwipeStarting = true;
+          onRightSwipeStart?.call(); // Call the new callback
+        }
         onSwipeDirectionChanged?.call(CardSwiperDirection.right);
       } else if (left < 0) {
         onSwipeDirectionChanged?.call(CardSwiperDirection.left);
+        _isRightSwipeStarting = false;
+      } else {
+        _isRightSwipeStarting = false;
       }
       left += dx;
     } else if (allowedSwipeDirection.right) {
       if (left >= 0) {
+        if (!_isRightSwipeStarting) {
+          _isRightSwipeStarting = true;
+          onRightSwipeStart?.call(); // Call the new callback
+        }
         onSwipeDirectionChanged?.call(CardSwiperDirection.right);
         left += dx;
+      } else {
+        _isRightSwipeStarting = false;
       }
     } else if (allowedSwipeDirection.left) {
       if (left <= 0) {
         onSwipeDirectionChanged?.call(CardSwiperDirection.left);
         left += dx;
+        _isRightSwipeStarting = false;
+      } else {
+        _isRightSwipeStarting = false;
       }
+    } else {
+      _isRightSwipeStarting = false;
     }
 
     if (allowedSwipeDirection.up && allowedSwipeDirection.down) {

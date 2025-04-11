@@ -45,7 +45,14 @@ class _CardSwiperState<T extends Widget> extends State<CardSwiper>
       allowedSwipeDirection: widget.allowedSwipeDirection,
       initialOffset: widget.backCardOffset,
       onSwipeDirectionChanged: onSwipeDirectionChanged,
+      onRightSwipeStart: _onRightSwipeStart, // Pass the new callback
     );
+  }
+
+  void _onRightSwipeStart() {
+    if (_currentIndex != null && widget.onRightSwipeStart != null) {
+      widget.onRightSwipeStart!(_currentIndex!);
+    }
   }
 
   void onSwipeDirectionChanged(CardSwiperDirection direction) {
@@ -54,6 +61,7 @@ class _CardSwiperState<T extends Widget> extends State<CardSwiper>
         _detectedVerticalDirection = direction;
         _detectedHorizontalDirection = direction;
       case CardSwiperDirection.right:
+      // No specific action here, the start is handled in CardAnimation
       case CardSwiperDirection.left:
         _detectedHorizontalDirection = direction;
       case CardSwiperDirection.top:
