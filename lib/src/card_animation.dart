@@ -14,7 +14,7 @@ class CardAnimation {
     this.isVerticalSwipingEnabled = true,
     this.allowedSwipeDirection = const AllowedSwipeDirection.all(),
     this.onSwipeDirectionChanged,
-    this.onRightSwipeStart, // Add the new callback here
+    this.onRightSwipeStart,
   }) : scale = initialScale;
 
   final double maxAngle;
@@ -25,7 +25,7 @@ class CardAnimation {
   final bool isVerticalSwipingEnabled;
   final AllowedSwipeDirection allowedSwipeDirection;
   final ValueChanged<CardSwiperDirection>? onSwipeDirectionChanged;
-  final VoidCallback? onRightSwipeStart; // Callback for right swipe start
+  final VoidCallback? onRightSwipeStart;
 
   double left = 0;
   double top = 0;

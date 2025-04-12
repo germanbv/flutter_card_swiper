@@ -45,7 +45,7 @@ class _CardSwiperState<T extends Widget> extends State<CardSwiper>
       allowedSwipeDirection: widget.allowedSwipeDirection,
       initialOffset: widget.backCardOffset,
       onSwipeDirectionChanged: onSwipeDirectionChanged,
-      onRightSwipeStart: _onRightSwipeStart, // Pass the new callback
+      onRightSwipeStart: _onRightSwipeStart,
     );
   }
 

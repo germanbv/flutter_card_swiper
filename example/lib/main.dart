@@ -24,33 +24,15 @@ class Example extends StatefulWidget {
 class _ExamplePageState extends State<Example> {
   final CardSwiperController controller = CardSwiperController();
   final List<Widget> cards = candidates.map(ExampleCard.new).toList();
-  CardSwiperDirection? _previousSwipeDirection;
-  int _currentTopCardIndex = 0; // To track the current top card index
+
   int? _specialCardIndex;
-  bool _hasSwipedRightStarted = false; // To prevent multiple insertions
+  bool _hasSwipedRightStarted = false;
+  CardSwiperDirection _previousDirection = CardSwiperDirection.none;
 
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-
-  void _handleRightSwipeStart(int index) {
-    print("Right swipe started at index: $index");
-    if (!_hasSwipedRightStarted) {
-      setState(() {
-        _hasSwipedRightStarted = true;
-        _specialCardIndex = index + 1;
-        cards.insert(
-          _specialCardIndex!,
-          ExampleCard(ExampleCandidateModel(
-              name: 'Special',
-              job: 'Test',
-              city: 'Valencia',
-              color: Colors.accents)),
-        );
-      });
-    }
   }
 
   @override
@@ -64,7 +46,7 @@ class _ExamplePageState extends State<Example> {
                 controller: controller,
                 cardsCount: cards.length,
                 onSwipe: _onSwipe,
-                onSwipeDirectionChange: _onSwipeDirectionChange,
+                onSwipeDirectionChange: _onSwipeDirectionChage,
                 onRightSwipeStart: _handleRightSwipeStart,
                 onUndo: _onUndo,
                 numberOfCardsDisplayed: 3,
@@ -122,21 +104,11 @@ class _ExamplePageState extends State<Example> {
   ) {
     if (currentIndex != null) {
       setState(() {
-        _currentTopCardIndex = currentIndex % cards.length;
         _hasSwipedRightStarted = false;
       });
     }
     return true;
   }
-
-  void _onSwipeDirectionChange(CardSwiperDirection newDirection, CardSwiperDirection? previousDirection) {
-    debugPrint('Swipe Direction Changed - Previous: $previousDirection, New: $newDirection');
-    setState(() {
-      _previousSwipeDirection = newDirection;
-    });
-  }
-
-  
 
   bool _onUndo(
     int? previousIndex,
@@ -147,5 +119,35 @@ class _ExamplePageState extends State<Example> {
       'The card $currentIndex was undod from the ${direction.name}',
     );
     return true;
+  }
+
+  void _handleRightSwipeStart(int index) {
+    print("Right swipe started at index: $index");
+    if (!_hasSwipedRightStarted) {
+      setState(() {
+        _hasSwipedRightStarted = true;
+        _specialCardIndex = index + 1;
+        cards.insert(
+          _specialCardIndex!,
+          ExampleCard(ExampleCandidateModel(
+              name: 'Special',
+              job: 'Test',
+              city: 'Valencia',
+              color: Colors.accents)),
+        );
+      });
+    }
+  }
+
+  void _onSwipeDirectionChage(CardSwiperDirection newDirection, CardSwiperDirection previousDirection) {
+    if (newDirection != previousDirection && newDirection == CardSwiperDirection.left || newDirection == CardSwiperDirection.none) {
+      if (_hasSwipedRightStarted) {
+         setState(() {
+          cards.removeAt(_specialCardIndex!);
+          _hasSwipedRightStarted = false;
+         });
+      }
+    }
+    _previousDirection = newDirection;
   }
 }
